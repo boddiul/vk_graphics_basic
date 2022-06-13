@@ -31,7 +31,7 @@ int main()
 {
   constexpr int WIDTH = 1024;
   constexpr int HEIGHT = 1024;
-  constexpr int VULKAN_DEVICE_ID = 1;
+  constexpr int VULKAN_DEVICE_ID = 0;
 
   bool showGUI = true;
 

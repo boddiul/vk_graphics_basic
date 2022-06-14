@@ -24,6 +24,8 @@ struct UniformParams
   mat4  lightMatrix;
   vec3  lightPos;
   float time;
+  vec3  lightDir;
+  float p1;
   vec3  baseColor;
   bool animateLightColor;
 };

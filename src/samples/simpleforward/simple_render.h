@@ -153,6 +153,15 @@ protected:
   void SetupDeviceFeatures();
   void SetupDeviceExtensions();
   void SetupValidationLayers();
+
+
+
+  bool animateLightColor = true;
+  int tm_type = 0;
+  bool post_bright = false;
+  bool post_grayscale = false;
+  bool post_black_white = false;
+  bool post_invert = false;
 };
 
 

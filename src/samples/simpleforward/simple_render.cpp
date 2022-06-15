@@ -196,6 +196,12 @@ void SimpleRender::UpdateUniformBuffer(float a_time)
 {
 // most uniforms are updated in GUI -> SetupGUIElements()
   m_uniforms.time = a_time;
+  m_uniforms.animateLightColor = animateLightColor ? 1 : 0;
+  m_uniforms.tm_type = tm_type;
+  m_uniforms.post_grayscale = post_grayscale ? 1 : 0;
+  m_uniforms.post_bright = post_bright ? 1 : 0;
+  m_uniforms.post_invert = post_invert ? 1 : 0;
+  m_uniforms.post_black_white = post_black_white ? 1 : 0;
   memcpy(m_uboMappedMem, &m_uniforms, sizeof(m_uniforms));
 }
 
@@ -559,8 +565,24 @@ void SimpleRender::SetupGUIElements()
     ImGui::Begin("Simple render settings");
 
     ImGui::ColorEdit3("Meshes base color", m_uniforms.baseColor.M, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoInputs);
-    ImGui::Checkbox("Animate light source color", &m_uniforms.animateLightColor);
+    ImGui::Checkbox("Animate light source color", &animateLightColor);
     ImGui::SliderFloat3("Light source position", m_uniforms.lightPos.M, -10.f, 10.f);
+
+
+    ImGui::SliderInt("Tone Mapping Type", &tm_type, 0, 4);
+    ImGui::Text("0 - None");
+    ImGui::Text("1 - Reinhard");
+    ImGui::Text("2 - Reinhard-Jodie");
+    ImGui::Text("3 - Uncharted 2");
+    ImGui::Text("4 - ACES (approximated)");
+
+
+    ImGui::NewLine();
+    ImGui::Text("Next apply in order:");
+    ImGui::Checkbox("Post Effect: Cubic Brightness", &post_bright);
+    ImGui::Checkbox("Post Effect: Grayscale", &post_grayscale);
+    ImGui::Checkbox("Post Effect: Black & White", &post_black_white);
+    ImGui::Checkbox("Post Effect: Invert", &post_invert);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

@@ -22,10 +22,23 @@ typedef float4x4     mat4;
 struct UniformParams
 {
   mat4  lightMatrix;
+
   vec3  lightPos;
   float time;
+
   vec3  baseColor;
-  bool animateLightColor;
+  uint animateLightColor;
+
+  uint post_invert;
+  uint post_bright;
+  uint post_grayscale;
+  uint post_black_white;
+
+  uint tm_type;
+  uint dummy1;
+  uint dummy2;
+  uint dummy3;
+
 };
 
 #endif //VK_GRAPHICS_BASIC_COMMON_H

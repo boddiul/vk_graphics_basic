@@ -21,6 +21,40 @@ layout(binding = 0, set = 0) uniform AppData
 
 layout (binding = 1) uniform sampler2D shadowMap;
 
+// http://steps3d.narod.ru/tutorials/skin-tutorial.html
+
+const float gamma         = 2.2;
+const float FDiel         = 0.04;       // Fresnel for dielectrics
+const float pi            = 3.141592;
+
+
+float phongExponent ( float glossiness )
+{
+    return (1.0/pow(1.0 - glossiness, 3.5) - 1.0);
+}
+
+vec3 Fresnel ( in vec3 f0, in float product )
+{
+    return mix ( f0, vec3 (1.0), pow(1.0 - product, 5.0) );
+}
+
+float Fresnel ( in float f0, in float product )
+{
+    return mix ( f0, 1.0, pow(1.0 - product, 5.0) );
+}
+
+    // Kelem-Szirmay-Kalos visibility
+float   KelemVis ( in float nl, in float nv, in float a )
+{
+    return 1.0 / ((nl*(1.0-a) + a)*nv*(1.0-a) + a);
+}
+
+float  D_Phong ( in float nh, in float n )
+{
+    return (n+2.0) * pow ( max ( 0, nh ), n ) / (2.0 * pi);
+}
+
+
 void main()
 {
   const vec4 posLightClipSpace = Params.lightMatrix*vec4(surf.wPos, 1.0f); // 
@@ -38,5 +72,37 @@ void main()
    
   vec3 lightDir   = normalize(Params.lightPos - surf.wPos);
   vec4 lightColor = max(dot(surf.wNorm, lightDir), 0.0f) * lightColor1;
-  out_fragColor   = (lightColor*shadow + vec4(0.1f)) * vec4(Params.baseColor, 1.0f);
+  vec4 resColor0  = lightColor; 
+
+  vec3 h = normalize(1.0 + surf.wNorm);
+
+  vec3 bump = vec3(1.0);
+  
+  //float spec = 0.6;
+  float spec = surf.wPos.x<0 ? 0.1 : 0.6;
+
+  vec3    n        = normalize(2.0 * (bump - vec3 ( 0.5 )));
+  vec4    clr      = pow ( resColor0, vec4 ( gamma ) );
+  vec4    diff     = clr * max ( dot ( n, lightDir ), 0.1 );
+  float   nh       = max ( dot ( n, h ), 0.0 );
+  float   nl       = max ( dot ( n, lightDir ), 0.0 );
+  float   nv       = max ( dot ( n, surf.wNorm ), 0.0 );
+  float   f         = Fresnel ( FDiel, clamp( dot ( h, surf.wNorm ), 0.0, 1.0 ) );
+  float   phongExp1 = pow ( 2.0, 14.0 * spec );
+  float   phongExp2 = phongExp1 * phongExp1;
+  float   spec1    = D_Phong ( nh, phongExp1 ) * f * KelemVis ( nl, nv, spec ) * nl;
+  float   spec2    = D_Phong ( nh, phongExp2 ) * f * KelemVis ( nl, nv, spec ) * nl;
+
+  vec4 resColor1 = vec4 ( diff.rgb, 1.0 );  
+  vec4 resColor2 =  (0.85*spec1 + 0.15*spec2) * vec4 ( 1.0 );
+
+
+  out_fragColor = resColor1;
+
+  out_fragColor.rgb += resColor2.rgb;
+
+  out_fragColor = out_fragColor * shadow;
+
+
+  
 }
